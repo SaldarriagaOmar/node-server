@@ -7,34 +7,42 @@ const rl = readline.createInterface({
 const tasks = [];
 
 function addTask() {
-    rl.question('Tarea: ', (description) => {
-        tasks.push({ description, completed: false });
-        showTasks();
-        rl.prompt();
+    return new Promise((resolve, reject) => {
+        rl.question('Tarea: ', (description) => {
+            tasks.push({ description, completed: false });
+            showTasks();
+            resolve();
+        });
     });
 }
 
 function removeTask() {
-    rl.question('Índice de la tarea que desea eliminar: ', (index) => {
-        if (index >= 0 && index < tasks.length) {
-            tasks.splice(index, 1);
-            showTasks();
-        } else {
-            console.log('Índice incorrecto.');
-        }
-        rl.prompt();
+    return new Promise((resolve, reject) => {
+        rl.question('Índice de la tarea que desea eliminar: ', (index) => {
+            if (index >= 0 && index < tasks.length) {
+                tasks.splice(index, 1);
+                showTasks();
+                resolve();
+            } else {
+                console.log('Índice incorrecto.');
+                reject('Índice incorrecto.');
+            }
+        });
     });
 }
 
 function completeTask() {
-    rl.question('Índice de la tarea completada: ', (index) => {
-        if (index >= 0 && index < tasks.length) {
-            tasks[index].completed = true;
-            showTasks();
-        } else {
-            console.log('Índice incorrecto.');
-        }
-        rl.prompt();
+    return new Promise((resolve, reject) => {
+        rl.question('Índice de la tarea completada: ', (index) => {
+            if (index >= 0 && index < tasks.length) {
+                tasks[index].completed = true;
+                showTasks();
+                resolve();
+            } else {
+                console.log('Índice incorrecto.');
+                reject('Índice incorrecto.');
+            }
+        });
     });
 }
 
@@ -48,33 +56,38 @@ function showTasks() {
 rl.setPrompt('Comando (add, remove, complete, show, exit): ');
 rl.prompt();
 
-rl.on('line', (line) => {
-    const command = line.trim().toLowerCase();
-    
-    switch (command) {
-        case 'add':
-            addTask();
-            break;
-        case 'remove':
-            removeTask();
-            break;
-        case 'complete':
-            completeTask();
-            break;
-        case 'show':
-            showTasks();
-            break;
-        case 'exit':
-            rl.close();
-            break;
-        default:
-            console.log('Comando incorrecto.');
-            rl.prompt();
-            break;
-    }
-});
+async function main() {
+    rl.on('line', async (line) => {
+        const command = line.trim().toLowerCase();
 
-rl.on('close', () => {
-    console.log('¡Adiós!');
-    process.exit(0);
-});
+        switch (command) {
+            case 'add':
+                await addTask();
+                break;
+            case 'remove':
+                await removeTask();
+                break;
+            case 'complete':
+                await completeTask();
+                break;
+            case 'show':
+                showTasks();
+                break;
+            case 'exit':
+                rl.close();
+                break;
+            default:
+                console.log('Comando incorrecto.');
+                break;
+        }
+
+        rl.prompt();
+    });
+
+    rl.on('close', () => {
+        console.log('¡Hasta luego!');
+        process.exit(0);
+    });
+}
+
+main();
